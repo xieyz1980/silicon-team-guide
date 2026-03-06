@@ -76,7 +76,7 @@
 
 **工作流程**：
 
-![AI内容团队协作流程图](screenshots/generated/ch05-workflow-diagram.png)
+![AI内容团队协作流程图](../screenshots/generated/ch05-workflow-diagram.png)
 
 ```
 时间轴：
