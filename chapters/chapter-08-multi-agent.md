@@ -614,6 +614,9 @@
 
 **5个Agent角色设计**：
 
+![5人AI助理团队架构图](../screenshots/from-juejin/juejin-architecture.jpg)
+*图片来源：掘金文章《用 OpenClaw + 飞书搭建5个AI助理团队》，作者：风象南*
+
 | Agent ID | 名称 | 职责 | 对接飞书应用 |
 |----------|------|------|-------------|
 | aiboss | AI大总管 | 总协调助手，负责任务分发和进度跟踪 | AI大总管Bot |
