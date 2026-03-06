@@ -604,6 +604,240 @@
 
 ---
 
+## 8.8 进阶案例：5人AI助理团队（OpenClaw实战）
+
+> **本节内容参考**：掘金热门文章《用 OpenClaw + 飞书，快速搭建 5 个可协作的 AI 助理团队》（作者：风象南，阅读量5,400+）
+
+### 场景介绍
+
+这是一个更复杂的真实场景：搭建一个完整的AI助理团队，每个成员负责不同领域，通过飞书协同工作。
+
+**5个Agent角色设计**：
+
+| Agent ID | 名称 | 职责 | 对接飞书应用 |
+|----------|------|------|-------------|
+| aiboss | AI大总管 | 总协调助手，负责任务分发和进度跟踪 | AI大总管Bot |
+| ainews | AI资讯助理 | AI行业资讯收集，每日8:00和18:00推送 | AI资讯Bot |
+| aicontent | AI内容助理 | 文章写作、视频脚本、社交媒体内容 | AI内容Bot |
+| aicode | AI代码助理 | 代码审查、技术方案、问题解决 | AI代码Bot |
+| aitask | AI任务助理 | 任务跟踪、提醒、进度管理 | AI任务Bot |
+
+**协作关系**：
+
+```
+用户
+  ↓
+AIBoss（大总管）- 统一入口
+  ├── AINews（资讯）←→ 每日推送、紧急资讯
+  ├── AIContent（内容）←→ 写作任务、内容策划
+  ├── AICode（代码）←→ 技术问题、代码审查
+  └── AITask（任务）←→ 待办提醒、进度跟踪
+```
+
+---
+
+### 核心配置步骤
+
+#### 步骤1：创建独立Workspace（工作空间隔离）
+
+每个Agent需要独立的工作空间，确保数据隔离：
+
+```bash
+# 创建5个独立工作区
+mkdir -p /root/.openclaw/workspace-boss
+mkdir -p /root/.openclaw/workspace-news
+mkdir -p /root/.openclaw/workspace-content
+mkdir -p /root/.openclaw/workspace-code
+mkdir -p /root/.openclaw/workspace-task
+```
+
+**为什么要隔离？**
+- ✅ 避免数据混乱：不同Agent的记忆和配置互不干扰
+- ✅ 安全隔离：敏感信息不会泄露给其他Agent
+- ✅ 独立演进：每个Agent可以独立升级和配置
+
+---
+
+#### 步骤2：为每个Agent创建核心文件
+
+**以AIBoss为例，其他Agent类似**：
+
+**文件1：IDENTITY.md（身份信息）**
+
+```markdown
+# IDENTITY.md - AIBoss
+
+- **Name**: AIBoss
+- **Role**: 大总管，团队协调者
+- **Emoji**: 👔
+- **Vibe**: 专业、高效、有条理
+```
+
+**文件2：SOUL.md（人设和行为准则）**
+
+```markdown
+# SOUL.md - AIBoss
+
+你是AIBoss，大总管，负责团队协调和任务管理。
+
+## 核心职责
+- 团队协调和任务分发
+- 项目进度跟踪
+- 跨Agent协作调度
+
+## 工作流程
+1. 接收用户需求
+2. 分析任务类型
+3. 分发给对应的Agent
+4. 跟踪任务进度
+5. 汇总结果给用户
+
+## 协作方式
+需要其他Agent协作时，使用工具调用：
+- 需要最新资讯？→ 调用AINews
+- 需要内容产出？→ 调用AIContent
+- 需要技术支持？→ 调用AICode
+- 需要任务提醒？→ 调用AITask
+```
+
+**文件3：AGENTS.md（团队成员通讯录）**
+
+```markdown
+# AGENTS.md - 团队成员
+
+- **AIBoss** (你) - 大总管
+  - agentId: aiboss
+  - 职责：团队协调、任务分发
+
+- **AINews** - 资讯助理
+  - agentId: ainews
+  - 职责：AI行业资讯收集、每日推送
+
+- **AIContent** - 内容助理
+  - agentId: aicontent
+  - 职责：文章写作、视频脚本、社交媒体内容
+
+- **AICode** - 代码助理
+  - agentId: aicode
+  - 职责：代码审查、技术方案、问题解决
+
+- **AITask** - 任务助理
+  - agentId: aitask
+  - 职责：任务跟踪、提醒、进度管理
+```
+
+**文件4：MEMORY.md（长期记忆）**
+
+```markdown
+# MEMORY.md - AIBoss 长期记忆
+
+## 项目记录
+
+### 2026-03-06
+- 完成5人AI助理团队搭建
+- 所有Agent上线运行
+- 首次跨Agent协作测试成功
+
+## 重要决策
+- 使用OpenClaw框架搭建
+- 飞书作为主要沟通渠道
+- 每个Agent独立工作空间
+```
+
+---
+
+#### 步骤3：配置OpenClaw多Agent
+
+**关键配置片段**（openclaw.json）：
+
+```json
+{
+  "agents": {
+    "list": [
+      {
+        "id": "aiboss",
+        "default": true,
+        "name": "aiboss",
+        "workspace": "/root/.openclaw/workspace-boss"
+      },
+      {
+        "id": "ainews",
+        "name": "ainews",
+        "workspace": "/root/.openclaw/workspace-news"
+      },
+      {
+        "id": "aicontent",
+        "name": "aicontent",
+        "workspace": "/root/.openclaw/workspace-content"
+      },
+      {
+        "id": "aicode",
+        "name": "aicode",
+        "workspace": "/root/.openclaw/workspace-code"
+      },
+      {
+        "id": "aitask",
+        "name": "aitask",
+        "workspace": "/root/.openclaw/workspace-task"
+      }
+    ]
+  }
+}
+```
+
+---
+
+### 常见踩坑与解决方案
+
+#### 坑1：Bot无法上线
+
+**症状**：飞书应用配置完成，但Bot状态一直是离线
+
+**原因**：未配置"长连接事件订阅"
+
+**解决方案**：
+1. 进入飞书开放平台 → 应用详情 → "事件订阅"
+2. 选择"长连接"模式
+3. 启用 `im.message.receive_v1` 事件
+4. 保存并重新发布应用
+
+---
+
+#### 坑2：Agent无法协作
+
+**症状**：Agent之间无法通信，协作请求失败
+
+**原因**：未配置 `AGENTS.md` 团队成员列表
+
+**解决方案**：在每个Agent的workspace中创建 `AGENTS.md`
+
+---
+
+#### 坑3：ID大小写导致配置失效
+
+**症状**：配置完成后，Agent无法启动或消息无法路由
+
+**原因**：使用了大小写混合的ID（如 `AIBoss`、`AIContent`）
+
+**解决方案**：所有ID必须**纯小写字母**：
+- ✅ 正确：`aiboss`、`aicontent`、`ainews`
+- ❌ 错误：`AIBoss`、`AIContent`、`AINews`
+
+---
+
+### 本节小结
+
+通过5人AI助理团队案例，你学到了：
+
+1. **多Agent架构设计**：如何设计互补的Agent角色
+2. **Workspace隔离**：确保数据安全和独立
+3. **身份文件配置**：IDENTITY/SOUL/AGENTS/MEMORY
+4. **常见坑位**：大小写、长连接、AGENTS.md等
+
+**这才是真正的"硅基团队"！** 🚀
+
+---
+
 ### 🎯 下一步预告
 
 **第9章：高级功能探索**
